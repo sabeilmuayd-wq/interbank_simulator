@@ -1,0 +1,91 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>💸 تحويل بيني</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                {% if success %}
+                <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
+                
+                <form method="POST" id="transferForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">البنك المرسل</label>
+                            <select name="from_bank" class="form-control" id="from_bank" required>
+                                <option value="">اختر البنك</option>
+                                {% for key, name in banks.items() %}
+                                <option value="{{ key }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">رقم الحساب المرسل</label>
+                            <select name="from_account" class="form-control" id="from_account" required>
+                                <option value="">اختر الحساب</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">البنك المستقبل</label>
+                            <select name="to_bank" class="form-control" id="to_bank" required>
+                                <option value="">اختر البنك</option>
+                                {% for key, name in banks.items() %}
+                                <option value="{{ key }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">رقم الحساب المستقبل</label>
+                            <select name="to_account" class="form-control" id="to_account" required>
+                                <option value="">اختر الحساب</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">المبلغ</label>
+                        <input type="number" name="amount" class="form-control" min="1" step="0.01" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">تنفيذ التحويل</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تحديث الحسابات عند تغيير البنك
+    function loadAccounts(bankKey, targetSelect) {
+        if (!bankKey) return;
+        fetch(`/api/accounts/${bankKey}`)
+            .then(r => r.json())
+            .then(data => {
+                targetSelect.innerHTML = '<option value="">اختر الحساب</option>';
+                data.forEach(acc => {
+                    targetSelect.innerHTML += `<option value="${acc.account}">${acc.account} - ${acc.owner} (${acc.balance})</option>`;
+                });
+            });
+    }
+    
+    document.getElementById('from_bank').addEventListener('change', function() {
+        loadAccounts(this.value, document.getElementById('from_account'));
+    });
+    
+    document.getElementById('to_bank').addEventListener('change', function() {
+        loadAccounts(this.value, document.getElementById('to_account'));
+    });
+</script>
+{% endblock %}
+```
