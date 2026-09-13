@@ -1,0 +1,70 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center text-white">
+        <h1>📋 سجل المعاملات المركزية</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>جميع المعاملات</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>المرجع</th>
+                            <th>من بنك</th>
+                            <th>إلى بنك</th>
+                            <th>المبلغ</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td><code>{{ t.reference }}</code></td>
+                            <td>{{ t.from_bank }}</td>
+                            <td>{{ t.to_bank }}</td>
+                            <td>{{ "%.2f"|format(t.amount) }}</td>
+                            <td>
+                                {% if t.status == 'completed' %}
+                                <span class="badge bg-success">مكتملة</span>
+                                {% else %}
+                                <span class="badge bg-warning">معلقة</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>📊 التسويات</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for s in settlements %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ s.bank }}</span>
+                        <span class="{{ 'settlement-positive' if s.net_amount >= 0 else 'settlement-negative' }}">
+                            {{ "%.2f"|format(s.net_amount) }}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
