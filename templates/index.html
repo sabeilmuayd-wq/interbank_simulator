@@ -1,0 +1,86 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center text-white">
+        <h1>🏦 محاكي التحويلات البينية</h1>
+        <p class="lead">نظام يحاكي التشغيل البيني بين البنوك عبر محول مركزي</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    {% for key, name in banks.items() %}
+    <div class="col-md-4 mb-3">
+        <div class="card bank-card">
+            <div class="card-header">
+                <h5>🏛️ {{ name }}</h5>
+            </div>
+            <div class="card-body">
+                <p>الحسابات المتاحة:</p>
+                <ul id="accounts-{{ key }}"></ul>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>📊 تسويات البنوك (Settlement)</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr><th>البنك</th><th>صافي الرصيد</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in settlements %}
+                        <tr>
+                            <td>{{ s.bank }}</td>
+                            <td class="{{ 'settlement-positive' if s.net_amount >= 0 else 'settlement-negative' }}">
+                                {{ "%.2f"|format(s.net_amount) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <small class="text-muted">الرصيد الموجب = البنك له أموال لدى المحول. الرصيد السالب = البنك مدين للمحول.</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>💡 كيف يعمل النظام؟</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>يطلب العميل تحويلاً من بنكه.</li>
+                    <li>البنك يخصم المبلغ ويرسل طلباً للمحول المركزي.</li>
+                    <li>المحول يعطي رقمًا مرجعيًا فريدًا ويسجل العملية.</li>
+                    <li>البنك المستقبل يودع المبلغ.</li>
+                    <li>المحول يؤكد العملية ويحدّث التسويات.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // جلب الحسابات لكل بنك
+    {% for key in banks.keys() %}
+    fetch('/api/accounts/{{ key }}')
+        .then(r => r.json())
+        .then(data => {
+            const ul = document.getElementById('accounts-{{ key }}');
+            data.forEach(acc => {
+                ul.innerHTML += `<li>${acc.account} - ${acc.owner} (<strong>${acc.balance}</strong>)</li>`;
+            });
+        });
+    {% endfor %}
+</script>
+{% endblock %}
+```
